@@ -20,7 +20,7 @@ wb2 = load_workbook(file2, data_only=True)
 merged_wb = Workbook()
 merged_wb.remove(merged_wb.active)  # Remove default empty sheet
 
-# ✅ Function to copy sheets while safely handling styles
+# ✅ Function to copy sheets without styles
 def copy_sheets(source_wb, target_wb):
     for sheet_name in source_wb.sheetnames:
         source_ws = source_wb[sheet_name]
@@ -37,13 +37,6 @@ def copy_sheets(source_wb, target_wb):
             for cell in row:
                 target_ws[cell.coordinate] = cell.value  # Copy values
 
-                # ✅ Skip problematic styles completely
-                try:
-                    if cell.has_style and hasattr(cell, "_style"):
-                        target_ws[cell.coordinate]._style = cell._style
-                except (IndexError, AttributeError, KeyError):
-                    print(f"⚠️ Skipping corrupted style in {sheet_name} at {cell.coordinate}")
-
         # ✅ Preserve column widths
         for col in source_ws.column_dimensions:
             if col in source_ws.column_dimensions and col in target_ws.column_dimensions:
@@ -56,6 +49,16 @@ copy_sheets(wb2, merged_wb)
 # ✅ Ensure the merged file contains data before saving
 if len(merged_wb.sheetnames) == 0:
     raise ValueError("❌ No sheets were copied! Check that the original files have data.")
+
+# ✅ Reset styles before saving (Fix for "list index out of range" error)
+merged_wb._alignments = []
+merged_wb._fonts = []
+merged_wb._borders = []
+merged_wb._fills = []
+merged_wb._protections = []
+merged_wb._numFmts = []
+merged_wb._cell_styles = []
+merged_wb._cell_style_named_styles = []
 
 # ✅ Save the final merged workbook
 try:
