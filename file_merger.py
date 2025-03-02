@@ -37,6 +37,8 @@ def copy_sheets(source_wb, target_wb):
                 target_ws[cell.coordinate] = cell.value  # Copy values
                 if cell.has_style:
                     target_ws[cell.coordinate]._style = cell._style  # Copy styles
+                    except IndexError:
+                print(f"⚠️ Skipping corrupted style in {cell.coordinate}")
 
         # ✅ Preserve column widths
         for col in source_ws.column_dimensions:
